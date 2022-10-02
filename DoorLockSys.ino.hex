@@ -1,0 +1,96 @@
+#include <Servo.h>
+#include <Keypad.h> 
+
+Servo Motor;
+int motorPin = 3;
+
+
+//DEFINE KEYPAD INPUT
+const int keypadCols = 3;
+const int keypadRows = 4;
+char keys[keypadRows][keypadCols] = {
+  {'1', '2', '3'},
+  {'4', '5', '6'},
+  {'7', '8', '9'},
+  {'*', '0', '#'}
+};
+byte rowPins[keypadRows] = {10, 9, 8, 7}; 
+byte colPins[keypadCols] = {11, 12, 13};
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, keypadRows, keypadCols);
+
+
+void setup() {
+  Motor.attach(motorPin);
+  Serial.begin(9600);
+}
+
+String password = "1938";
+int pwdigit = 4;
+int tempdigit = 0;
+String temp = "";
+
+void ResetInputPassword()
+{
+  Serial.println("SIFIRLANDI");
+  Serial.println("------------------------------");
+  temp = "";
+  tempdigit = 0;
+}
+void loop() {
+  char c = keypad.getKey();
+  if (c)
+  {
+    if (tempdigit == 4)
+    {
+      if (c == '#')
+      {
+        if (temp == password)
+        {
+          Serial.println("BASARILI");
+          //kilidi aç
+          Motor.write(180);
+          delay(20);
+        }
+        else
+        {
+          Serial.println("YANLIS");
+          ResetInputPassword();
+          //yanlış uyarısı
+        }
+      }
+      if (c == '*')
+      {
+        ResetInputPassword();
+        Motor.write(90);
+        delay(20);
+      }
+      else
+      {
+        //şifre yazıldı onay bekliyor
+      }
+    }
+    else
+    {
+      if (c == '*')
+      {
+        ResetInputPassword();
+      }
+      else if (c == '#')
+      {
+      }
+      else
+      {
+        temp += c;
+        tempdigit++;
+        Serial.print(c);
+        Serial.println(" EKLENDI");
+        Serial.print("GIRISIN GUNCEL HALI : ");
+        Serial.print(temp);
+        Serial.print(" --- ");
+        Serial.print(tempdigit);
+        Serial.println(" basamak");
+      }
+    }
+  }
+}
